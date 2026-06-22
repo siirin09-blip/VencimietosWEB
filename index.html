@@ -106,6 +106,10 @@ h4{font-size:12px;margin-bottom:3px;font-weight:700}
 .oblig-card.no-aplica .oc-add{display:none}
 .sel-resumen{background:#edf3ea;border:1px solid #9ab8a0;border-radius:2px;padding:10px 14px;font-size:12px;color:#1a3d22;margin-bottom:12px}
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/themes/material_blue.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/es.min.js"></script>
 </head>
 <body>
 
@@ -242,27 +246,54 @@ h4{font-size:12px;margin-bottom:3px;font-weight:700}
 <div id="view-carga" class="panel">
   <div class="pbox">
     <h3>Cargar vencimientos extra — empresa / período</h3>
-    <div class="info">Los vencimientos automáticos se generan según el perfil. Aquí agregás los que no están en el catálogo.</div>
-    <div class="frow">
+    <div class="info">Agregá obligaciones personalizadas para todos los meses del año de una sola vez.</div>
+    <div class="frow" style="margin-bottom:12px">
       <div class="fg"><label>Empresa</label><select id="cEmp" onchange="cargaSync()"></select></div>
-      <div class="fg"><label>Período</label><select id="cPer" onchange="cargaSync()"></select></div>
     </div>
-    <div class="frow">
-      <div class="fg"><label>Fecha</label><input type="date" id="cFecha"></div>
-      <div class="fg"><label>Detalle</label><textarea id="cDet" placeholder="Ej: SIRE/SICORE: Pago a cuenta CUIT 4"></textarea></div>
-      <div class="fg"><label>Organismo</label>
-        <select id="cOrg">
-          <option value="ARCA">ARCA</option><option value="ARBA">ARBA</option>
-          <option value="AGIP">AGIP</option><option value="Misiones">Misiones</option>
-          <option value="CM">Conv. Multilateral</option><option value="Otro">Otro</option>
-        </select>
+
+    <!-- FORMULARIO NUEVA OBLIGACIÓN ANUAL -->
+    <div style="background:#f4f7fb;border:1px solid #d0d8e8;border-radius:8px;padding:18px 20px;margin-bottom:18px">
+      <div style="font-weight:700;color:#1a3f6b;font-size:14px;margin-bottom:14px">Editar obligación personalizada</div>
+      <div class="frow" style="margin-bottom:12px;align-items:center;gap:16px">
+        <div class="fg" style="max-width:120px"><label>Año</label>
+          <select id="cAnio" style="width:100%"><option value="2026">2026</option></select>
+        </div>
+        <div class="fg" style="flex:1"><label>Nombre de la obligación</label>
+          <input type="text" id="cDet" placeholder="Ej: Anticipo Ganancias, SIRE quincenal..." style="width:100%">
+        </div>
+        <div class="fg" style="max-width:160px"><label>Organismo</label>
+          <select id="cOrg" style="width:100%">
+            <option value="ARCA">ARCA</option><option value="ARBA">ARBA</option>
+            <option value="AGIP">AGIP</option><option value="CM">Conv. Multilateral</option>
+            <option value="Misiones">Misiones</option><option value="Otro">Otro</option>
+          </select>
+        </div>
       </div>
-      <button class="btn-g green" onclick="agregarItem()">+ Agregar</button>
+      <div class="frow" style="margin-bottom:14px;gap:10px;align-items:center">
+        <button onclick="completarFechasExtra()" style="background:#fff;border:2px solid #1a8c6b;color:#1a8c6b;font-weight:700;border-radius:4px;padding:6px 16px;cursor:pointer">COMPLETAR FECHAS</button>
+        <button onclick="limpiarFechasExtra()" style="background:#fff;border:2px solid #1a8c6b;color:#1a8c6b;font-weight:700;border-radius:4px;padding:6px 16px;cursor:pointer">LIMPIAR FECHAS</button>
+        <label style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="cCopiarOtros" checked> Copiar a otros períodos
+        </label>
+      </div>
+      <!-- GRILLA 12 MESES -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px 18px" id="grilla-meses-extra">
+      </div>
+      <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end">
+        <button onclick="limpiarFormExtra()" style="padding:7px 18px;border:1px solid #ccc;background:#fff;border-radius:4px;cursor:pointer;font-weight:600">CANCELAR</button>
+        <button onclick="guardarObligacionAnual()" style="padding:7px 22px;background:#1a3f6b;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:700">GUARDAR</button>
+      </div>
     </div>
+
     <div id="listaExtra" style="margin-top:10px"></div>
     <div style="margin-top:14px;padding-top:11px;border-top:1px solid #e0e6f0">
-      <div class="fg" style="margin-bottom:8px"><label>Nota del período</label><input type="text" id="cNota" style="width:500px" placeholder="Ej: *-- Pago diferido MiPyME..."></div>
-      <button class="btn-g blue" onclick="guardarNota()">Guardar nota</button>
+      <div class="fg" style="margin-bottom:8px"><label>Nota del período</label>
+        <div class="frow" style="gap:8px;align-items:center">
+          <select id="cPer" onchange="cargaSync()" style="width:160px"></select>
+          <input type="text" id="cNota" style="flex:1" placeholder="Ej: *-- Pago diferido MiPyME...">
+          <button class="btn-g blue" onclick="guardarNota()">Guardar nota</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -849,22 +880,28 @@ function abrirTab(t){
 function sincronizarPanelCarga(){
   var eVal=document.getElementById("selEmp").value,pVal=document.getElementById("selPer").value;
   var ce=document.getElementById("cEmp"),cp=document.getElementById("cPer");
-  ce.innerHTML="";cp.innerHTML="";
+  ce.innerHTML="";if(cp)cp.innerHTML="";
   Object.keys(PERFILES).forEach(function(k){
     var o=document.createElement("option");o.value=k;o.textContent=PERFILES[k].razonSocial;
     if(k===eVal)o.selected=true;ce.appendChild(o);
   });
-  PERIODOS_LISTA.forEach(function(k){
-    var o=document.createElement("option");o.value=k;o.textContent=MESES_ET[k];
-    if(k===pVal)o.selected=true;cp.appendChild(o);
-  });
+  if(cp){
+    PERIODOS_LISTA.forEach(function(k){
+      var o=document.createElement("option");o.value=k;o.textContent=MESES_ET[k];
+      if(k===pVal)o.selected=true;cp.appendChild(o);
+    });
+  }
+  iniciarGrillaMeses();
   cargaSync();
 }
 function cargaSync(){
-  var eKey=document.getElementById("cEmp").value,pKey=document.getElementById("cPer").value;
+  var eKey=document.getElementById("cEmp").value;
+  var cpEl=document.getElementById("cPer");
+  var pKey=cpEl?cpEl.value:document.getElementById("selPer").value;
   if(!eKey||!pKey) return;
   var p=PERFILES[eKey];
-  document.getElementById("cNota").value=((p.extras[pKey]&&p.extras[pKey].notas)||[])[0]||"";
+  var notaEl=document.getElementById("cNota");
+  if(notaEl) notaEl.value=((p.extras[pKey]&&p.extras[pKey].notas)||[])[0]||"";
   renderListaExtra(eKey,pKey);
 }
 function renderListaExtra(eKey,pKey){
@@ -953,20 +990,119 @@ document.addEventListener("click",function(e){
   if(typeof filtrarCatalogo==="function") filtrarCatalogo();
   guardarPerfilNube(eKey);
 });
-function agregarItem(){
-  var eKey=document.getElementById("cEmp").value,pKey=document.getElementById("cPer").value;
-  var fecha=document.getElementById("cFecha").value,det=document.getElementById("cDet").value.trim();
+// ═══ CARGAR EXTRAS — NUEVO PANEL ANUAL ═══════════════════════════════
+var MESES_NOMBRES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+function iniciarGrillaMeses(){
+  var anio=document.getElementById("cAnio")?document.getElementById("cAnio").value:"2026";
+  var html="";
+  for(var m=1;m<=12;m++){
+    var pKey=anio+"-"+(m<10?"0":"")+m;
+    html+='<div>'
+      +'<label style="font-size:12px;font-weight:600;color:#444">'+MESES_NOMBRES[m-1]+'</label>'
+      +'<input type="text" class="ficha-inp carga-mes-inp" data-per="'+pKey+'" data-mes="'+m+'" data-anio="'+anio+'" placeholder="dd/mm/'+anio+'" style="width:100%;margin-top:3px;cursor:pointer;background:#fff">'
+      +'</div>';
+  }
+  var g=document.getElementById("grilla-meses-extra");
+  if(!g) return;
+  g.innerHTML=html;
+  // Inicializar Flatpickr en cada input restringido al mes correspondiente
+  g.querySelectorAll(".carga-mes-inp").forEach(function(inp){
+    var mes=+inp.getAttribute("data-mes");
+    var anioVal=+inp.getAttribute("data-anio");
+    var minDate=new Date(anioVal,mes-1,1);
+    var maxDate=new Date(anioVal,mes,0); // último día del mes
+    flatpickr(inp,{
+      locale:"es",
+      dateFormat:"d/m/Y",
+      altInput:false,
+      minDate:minDate,
+      maxDate:maxDate,
+      defaultDate:null,
+      disableMobile:true,
+      onReady:function(sel,str,fp){
+        // Al abrir, navegar directo al mes del input
+        fp.jumpToDate(minDate);
+      },
+      onOpen:function(sel,str,fp){
+        fp.jumpToDate(minDate);
+      }
+    });
+  });
+}
+
+function completarFechasExtra(){
+  document.querySelectorAll(".carga-mes-inp").forEach(function(inp){
+    var mes=+inp.getAttribute("data-mes");
+    var anioVal=inp.getAttribute("data-anio")||"2026";
+    // Día 20 del mes como sugerencia
+    var dia="20";
+    var fechaStr=dia+"/"+(mes<10?"0":""+mes)+"/"+anioVal;
+    // Setear en Flatpickr
+    if(inp._flatpickr){
+      inp._flatpickr.setDate(fechaStr,true,"d/m/Y");
+    } else {
+      inp.value=fechaStr;
+    }
+  });
+}
+
+function limpiarFechasExtra(){
+  document.querySelectorAll(".carga-mes-inp").forEach(function(inp){
+    if(inp._flatpickr) inp._flatpickr.clear();
+    else inp.value="";
+  });
+}
+
+function limpiarFormExtra(){
+  var d=document.getElementById("cDet"); if(d) d.value="";
+  limpiarFechasExtra();
+}
+
+function parseFechaExtra(val){
+  // Convierte dd/mm/yyyy → yyyy-mm-dd para guardar internamente
+  if(!val) return "";
+  if(val.indexOf("/")>-1){
+    var p=val.split("/");
+    if(p.length===3) return p[2]+"-"+p[1]+"-"+p[0];
+  }
+  return val; // ya en formato yyyy-mm-dd
+}
+
+function guardarObligacionAnual(){
+  var eKey=document.getElementById("cEmp").value;
+  var det=(document.getElementById("cDet").value||"").trim();
   var org=document.getElementById("cOrg").value;
-  if(!fecha||!det){alert("Complet\u00e1 fecha y detalle.");return;}
+  if(!det){alert("Ingres\u00e1 el nombre de la obligaci\u00f3n.");return;}
+  if(!eKey){alert("Seleccion\u00e1 una empresa.");return;}
   var p=PERFILES[eKey];
-  if(!p.extras[pKey]) p.extras[pKey]={notas:[],items:[]};
-  p.extras[pKey].items.push({fecha:fecha,detalle:det,org:org,_auto:false});
-  document.getElementById("cFecha").value="";document.getElementById("cDet").value="";
-  renderListaExtra(eKey,pKey);
-  document.getElementById("selEmp").value=eKey;document.getElementById("selPer").value=pKey;
+  var inputs=document.querySelectorAll(".carga-mes-inp");
+  var guardados=0;
+  inputs.forEach(function(inp){
+    var pKey=inp.getAttribute("data-per");
+    var val=inp._flatpickr?inp._flatpickr.input.value:inp.value;
+    var fecha=parseFechaExtra(val);
+    if(!fecha) return;
+    if(!p.extras[pKey])p.extras[pKey]={notas:[],items:[],excluidos:[]};
+    if(!p.extras[pKey].items)p.extras[pKey].items=[];
+    p.extras[pKey].items.push({fecha:fecha,detalle:det,org:org,_auto:false});
+    guardados++;
+  });
+  if(!guardados){alert("No hay fechas ingresadas.");return;}
+  limpiarFormExtra();
+  var perActual=document.getElementById("selPer")?document.getElementById("selPer").value:"";
+  renderListaExtra(eKey,perActual||Object.keys(PERFILES[eKey].extras||{})[0]||"2026-01");
+  document.getElementById("selEmp").value=eKey;
   render();
   guardarPerfilNube(eKey);
+  alert("Obligaci\u00f3n guardada en "+guardados+" mes"+(guardados!==1?"es":"")+".");
 }
+
+function agregarItem(){
+  // Función legacy — ya no se usa, redirige al nuevo sistema
+  guardarObligacionAnual();
+}
+
 function guardarNota(){
   var eKey=document.getElementById("cEmp").value,pKey=document.getElementById("cPer").value;
   var nota=document.getElementById("cNota").value.trim();
@@ -1850,6 +1986,203 @@ function tieneExtra(eKey,pKey,id){
   var extras=(p.extras[pKey]&&p.extras[pKey].items)||[];
   return extras.some(function(x){return x._catId===id;});
 }
+// ═══ MODAL ANUAL ══════════════════════════════════════════════════════
+function abrirModalAnual(emp, per, id, ob){
+  var p=PERFILES[emp];
+  var MESES_LABEL=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  var anio="2026";
+
+  // Construir grilla 12 meses igual que Cargar extras
+  var grilla="";
+  for(var m=1;m<=12;m++){
+    var pKey=anio+"-"+(m<10?"0":"")+m;
+    // Fecha sugerida automática
+    var sugerida="";
+    var resAuto=ob.calcFecha(pKey,p);
+    if(resAuto && resAuto.fecha) sugerida=resAuto.fecha; // yyyy-mm-dd
+    // Si ya tiene item guardado, usar esa fecha
+    var yaItems=(p.extras[pKey]&&p.extras[pKey].items)||[];
+    var yaItem=yaItems.filter(function(x){return x._catId===id;})[0];
+    if(yaItem && yaItem.fecha) sugerida=yaItem.fecha;
+    // Convertir yyyy-mm-dd → dd/mm/yyyy para mostrar
+    var valMostrar="";
+    if(sugerida && sugerida.indexOf("-")>-1){
+      var pts=sugerida.split("-");
+      if(pts.length===3) valMostrar=pts[2]+"/"+pts[1]+"/"+pts[0];
+    }
+    grilla+='<div>'
+      +'<label style="font-size:12px;font-weight:600;color:#444">'+MESES_LABEL[m-1]+'</label>'
+      +'<input type="text" class="ficha-inp modal-anual-inp" data-per="'+pKey+'" data-mes="'+m+'" data-anio="'+anio+'" placeholder="dd/mm/'+anio+'" value="'+valMostrar+'" style="width:100%;margin-top:3px;cursor:pointer;background:#fff">'
+      +'</div>';
+  }
+
+  var html='<div style="background:#fff;border-radius:8px;padding:28px 32px;max-width:620px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.18)">'
+    +'<div style="font-weight:700;color:#1a3f6b;font-size:15px;margin-bottom:4px">Editar obligación personalizada</div>'
+    +'<div style="color:#555;font-size:13px;margin-bottom:14px">'+ob.label+' &nbsp;·&nbsp; <strong>'+p.razonSocial+'</strong></div>'
+    // Nombre editable
+    +'<div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">'
+    +'<div style="flex:1"><label style="font-size:12px;font-weight:600;color:#444">Nombre de la obligación</label>'
+    +'<input type="text" id="modalAnualDet" class="ficha-inp" value="'+ob.label+'" style="width:100%;margin-top:3px"></div>'
+    +'<div><label style="font-size:12px;font-weight:600;color:#444">Organismo</label>'
+    +'<input type="text" id="modalAnualOrg" class="ficha-inp" value="'+(ob.org||"")+'" style="width:120px;margin-top:3px"></div>'
+    +'</div>'
+    // Botones completar/limpiar
+    +'<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px">'
+    +'<button onclick="completarModalAnual()" style="background:#fff;border:2px solid #1a8c6b;color:#1a8c6b;font-weight:700;border-radius:4px;padding:6px 16px;cursor:pointer">COMPLETAR FECHAS</button>'
+    +'<button onclick="limpiarModalAnual()" style="background:#fff;border:2px solid #1a8c6b;color:#1a8c6b;font-weight:700;border-radius:4px;padding:6px 16px;cursor:pointer">LIMPIAR FECHAS</button>'
+    +'</div>'
+    // Grilla 3 columnas
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px 18px" id="modalAnualGrilla">'
+    +grilla
+    +'</div>'
+    +'<div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end">'
+    +'<button onclick="cerrarModal()" style="padding:7px 18px;border:1px solid #ccc;background:#fff;border-radius:4px;cursor:pointer;font-weight:600">CANCELAR</button>'
+    +'<button onclick="confirmarModalAnual(\''+emp+'\',\''+id+'\')" style="padding:7px 22px;background:#1a3f6b;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:700">GUARDAR</button>'
+    +'</div>'
+    +'</div>';
+
+  var overlay=document.getElementById("modalOverlay");
+  overlay.innerHTML=html;
+  overlay.style.display="flex";
+
+  // Inicializar Flatpickr en los inputs del modal
+  overlay.querySelectorAll(".modal-anual-inp").forEach(function(inp){
+    var mes=+inp.getAttribute("data-mes");
+    var anioV=+inp.getAttribute("data-anio");
+    flatpickr(inp,{
+      locale:"es",dateFormat:"d/m/Y",altInput:false,
+      minDate:new Date(anioV,mes-1,1),maxDate:new Date(anioV,mes,0),
+      disableMobile:true,
+      onReady:function(sel,str,fp){fp.jumpToDate(new Date(anioV,mes-1,1));},
+      onOpen:function(sel,str,fp){fp.jumpToDate(new Date(anioV,mes-1,1));}
+    });
+  });
+}
+
+function completarModalAnual(){
+  // Completa con la fecha sugerida automática (ya está en value), si no, día 20
+  document.querySelectorAll("#modalAnualGrilla .modal-anual-inp").forEach(function(inp){
+    if(inp.value) return; // ya tiene fecha
+    var mes=+inp.getAttribute("data-mes");
+    var anioV=inp.getAttribute("data-anio")||"2026";
+    var fecha="20/"+(mes<10?"0":"")+mes+"/"+anioV;
+    if(inp._flatpickr) inp._flatpickr.setDate(fecha,true,"d/m/Y");
+    else inp.value=fecha;
+  });
+}
+
+function limpiarModalAnual(){
+  document.querySelectorAll("#modalAnualGrilla .modal-anual-inp").forEach(function(inp){
+    if(inp._flatpickr) inp._flatpickr.clear();
+    else inp.value="";
+  });
+}
+
+function confirmarModalAnual(emp, id){
+  var p=PERFILES[emp];
+  var ob=CATALOGO.filter(function(x){return x.id===id;})[0];
+  if(!ob)return;
+  var detalle=(document.getElementById("modalAnualDet").value||"").trim()||ob.label;
+  var org=(document.getElementById("modalAnualOrg").value||"").trim()||ob.org||"";
+  var inputs=document.querySelectorAll("#modalAnualGrilla .modal-anual-inp");
+  var guardados=0;
+  inputs.forEach(function(inp){
+    var pKey=inp.getAttribute("data-per");
+    var val=inp._flatpickr?inp._flatpickr.input.value:inp.value;
+    var fecha=parseFechaExtra(val);
+    if(!fecha) return;
+    if(!p.extras[pKey])p.extras[pKey]={notas:[],items:[],excluidos:[]};
+    if(!p.extras[pKey].excluidos)p.extras[pKey].excluidos=[];
+    if(!p.extras[pKey].items)p.extras[pKey].items=[];
+    p.extras[pKey].excluidos=p.extras[pKey].excluidos.filter(function(x){return x!==id;});
+    p.extras[pKey].items=p.extras[pKey].items.filter(function(x){return x._catId!==id;});
+    p.extras[pKey].items.push({fecha:fecha,detalle:detalle,org:org,_catId:id,_auto:false});
+    guardados++;
+  });
+  cerrarModal();
+  document.getElementById("selEmp").value=emp;
+  render();filtrarCatalogo();
+  renderListaExtra(emp,document.getElementById("selPer").value||per);
+  guardarPerfilNube(emp);
+  if(guardados>0) setTimeout(function(){alert("Guardado en "+guardados+" mes"+(guardados!==1?"es":"")+".");},100);
+}
+  var p=PERFILES[emp];
+  var MESES_LABEL=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  var periodos=PERIODOS_LISTA.filter(function(k){return k.slice(0,4)==="2026";});
+
+  var rows="";
+  periodos.forEach(function(pKey){
+    var mesIdx=+pKey.split("-")[1]-1;
+    // Fecha sugerida: automática si existe, o la que ya estaba guardada
+    var sugerida="";
+    var resAuto=ob.calcFecha(pKey,p);
+    if(resAuto) sugerida=resAuto.fecha;
+    // Si ya tiene item manual guardado, usarlo como valor
+    var yaItems=(p.extras[pKey]&&p.extras[pKey].items)||[];
+    var yaItem=yaItems.filter(function(x){return x._catId===id;})[0];
+    if(yaItem) sugerida=yaItem.fecha;
+
+    var fechaVal=sugerida||"";
+    rows+='<tr>'
+      +'<td style="padding:6px 10px;font-weight:600;white-space:nowrap">'+MESES_LABEL[mesIdx]+' 2026</td>'
+      +'<td style="padding:6px 10px"><input type="date" class="ficha-inp modal-fecha-row" data-per="'+pKey+'" value="'+fechaVal+'" style="width:150px"></td>'
+      +'<td style="padding:6px 10px;color:#888;font-size:12px">'+(sugerida?'Sugerida: '+fi(sugerida):'—')+'</td>'
+      +'</tr>';
+  });
+
+  var html='<div style="background:#fff;border-radius:8px;padding:28px 32px;max-width:520px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.18)">'
+    +'<h3 style="margin:0 0 4px;color:#1a3f6b;font-size:16px">'+ob.label+'</h3>'
+    +'<p style="margin:0 0 16px;color:#555;font-size:13px">Empresa: <strong>'+p.razonSocial+'</strong></p>'
+    +'<p style="margin:0 0 12px;color:#666;font-size:13px">Ingresá la fecha de vencimiento para cada mes. Las fechas sugeridas se calculan automáticamente según el CUIT.</p>'
+    +'<table style="width:100%;border-collapse:collapse">'
+    +'<thead><tr><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #1a3f6b;color:#1a3f6b">Mes</th>'
+    +'<th style="text-align:left;padding:6px 10px;border-bottom:2px solid #1a3f6b;color:#1a3f6b">Fecha</th>'
+    +'<th style="text-align:left;padding:6px 10px;border-bottom:2px solid #1a3f6b;color:#1a3f6b">Referencia</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody>'
+    +'</table>'
+    +'<div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end">'
+    +'<button onclick="cerrarModal()" style="padding:8px 18px;border:1px solid #ccc;background:#fff;border-radius:4px;cursor:pointer">Cancelar</button>'
+    +'<button onclick="confirmarModalAnual(\''+emp+'\',\''+id+'\')" style="padding:8px 18px;background:#1a3f6b;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:700">Guardar en todos los meses</button>'
+    +'</div>'
+    +'</div>';
+
+  var overlay=document.getElementById("modalOverlay");
+  overlay.innerHTML=html;
+  overlay.style.display="flex";
+}
+
+function confirmarModalAnual(emp, id){
+  var p=PERFILES[emp];
+  var ob=CATALOGO.filter(function(x){return x.id===id;})[0];
+  if(!ob)return;
+  var inputs=document.querySelectorAll(".modal-fecha-row");
+  var guardados=0;
+  inputs.forEach(function(inp){
+    var pKey=inp.getAttribute("data-per");
+    var fecha=inp.value;
+    if(!fecha) return; // mes sin fecha: no tocar
+    if(!p.extras[pKey])p.extras[pKey]={notas:[],items:[],excluidos:[]};
+    if(!p.extras[pKey].excluidos)p.extras[pKey].excluidos=[];
+    if(!p.extras[pKey].items)p.extras[pKey].items=[];
+    // Quitar de excluidos
+    p.extras[pKey].excluidos=p.extras[pKey].excluidos.filter(function(x){return x!==id;});
+    // Calcular detalle desde el catálogo
+    var res=ob.calcFecha(pKey,p);
+    var detalle=res?res.detalle:(ob.label+" CUIT "+p.terminacion);
+    var org=res?res.org:(ob.org||"");
+    // Reemplazar si ya existe
+    p.extras[pKey].items=p.extras[pKey].items.filter(function(x){return x._catId!==id;});
+    p.extras[pKey].items.push({fecha:fecha,detalle:detalle,org:org,_catId:id,_auto:false});
+    guardados++;
+  });
+  cerrarModal();
+  document.getElementById("selEmp").value=emp;
+  render();filtrarCatalogo();
+  renderListaExtra(emp,document.getElementById("selPer").value);
+  guardarPerfilNube(emp);
+  if(guardados>0) setTimeout(function(){alert("Vencimiento agregado en "+guardados+" mes"+(guardados!==1?"es":"")+".");},100);
+}
+
 function abrirSelector(){
   var eVal=document.getElementById("selEmp").value,pVal=document.getElementById("selPer").value;
   var se=document.getElementById("sEmp"),sp=document.getElementById("sPer");
@@ -1928,16 +2261,8 @@ document.addEventListener("click",function(e){
   if(accion==="agregar"){
     var ob=CATALOGO.filter(function(x){return x.id===id;})[0];
     if(!ob)return;
-    var p=PERFILES[emp],res=ob.calcFecha(per,p);
-    if(!res)return;
-    if(!p.extras[per])p.extras[per]={notas:[],items:[],excluidos:[]};
-    if(!p.extras[per].excluidos)p.extras[per].excluidos=[];
-    // Quitar de excluidos si estaba
-    p.extras[per].excluidos=p.extras[per].excluidos.filter(function(x){return x!==id;});
-    // Quitar duplicado de items y agregar
-    p.extras[per].items=p.extras[per].items.filter(function(x){return x._catId!==id;});
-    res._catId=id;res._auto=false;
-    p.extras[per].items.push(res);
+    abrirModalAnual(emp,per,id,ob);
+    return;
   } else if(accion==="quitar"||accion==="quitar-auto"){
     // Sacar de items Y agregar a excluidos — persiste en Supabase
     var p2=PERFILES[emp];
