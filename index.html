@@ -1964,9 +1964,13 @@ var CATALOGO = [
 
   // ══ SINDICALES ═══════════════════════════════════════════════════════
   // CCT 130/75 — Empleados de Comercio (FAECYS / SEC)
-  {id:"faecys_cuota",cat:"Sindicales \u2014 Comercio (CCT 130/75)",label:"FAECYS / SEC \u2014 Cuota sindical",
-   desc:"Cuota sindical Empleados de Comercio CCT 130/75. Vence con F.931 (d\u00edas 9/10/11 seg\u00fan terminaci\u00f3n CUIT).",org:"Sindical",
-   calcFecha:function(pKey,p){var d=F931_EXACTO[pKey];if(!d)return null;return {fecha:mkF(pKey,d[p.grupo]),detalle:"FAECYS/SEC: Cuota sindical CCT 130/75 CUIT "+p.terminacion,org:"Sindical"};}},
+  {id:"faecys_cuota",cat:"Sindicales \u2014 Comercio (CCT 130/75)",label:"FAECYS \u2014 Cuota sindical",
+   desc:"Cuota sindical Empleados de Comercio CCT 130/75 (Federaci\u00f3n Argentina de Empleados de Comercio y Servicios). Vence con F.931.",org:"Sindical",
+   calcFecha:function(pKey,p){var d=F931_EXACTO[pKey];if(!d)return null;return {fecha:mkF(pKey,d[p.grupo]),detalle:"FAECYS: Cuota sindical CCT 130/75 CUIT "+p.terminacion,org:"Sindical"};}},
+
+  {id:"sec_aporte",cat:"Sindicales \u2014 Comercio (CCT 130/75)",label:"SEC \u2014 Seguro de Desempleo",
+   desc:"Aporte al Seguro de Desempleo (Sindicato de Empleados de Comercio). Vence con F.931.",org:"Sindical",
+   calcFecha:function(pKey,p){var d=F931_EXACTO[pKey];if(!d)return null;return {fecha:mkF(pKey,d[p.grupo]),detalle:"SEC: Seguro de Desempleo CCT 130/75 CUIT "+p.terminacion,org:"Sindical"};}},
 
   {id:"inacap_ap",cat:"Sindicales \u2014 Comercio (CCT 130/75)",label:"INACAP \u2014 Aporte patronal",
    desc:"Instituto Argentino de Capacitaci\u00f3n Profesional y Tecnol\u00f3gica para el Comercio. Vence con F.931 (d\u00edas 9/10/11 seg\u00fan terminaci\u00f3n CUIT).",org:"Sindical",
