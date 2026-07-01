@@ -1631,6 +1631,12 @@ var CATALOGO = [
     calcFecha:function(pKey,p){if(pKey.slice(5)!=="12")return null;return {fecha:mkF(pKey,17),detalle:"Ganancias PH: 3\u00b0 Anticipo 2027 CUIT "+p.terminacion,org:"ARCA"};}},
   {id:"bp_acc_soc",cat:"ARCA \u2014 Bienes Personales",label:"Bs. Pers. \u2014 Acciones y Participaciones Societarias (junio)",desc:"DDJJ anual Bienes Personales Acciones y Part. Soc.",org:"ARCA",
     calcFecha:function(pKey,p){if(pKey.slice(5)!=="06")return null;var dias=[11,11,12,16,16];return {fecha:mkF(pKey,dias[p.grupo]),detalle:"Bs. Pers. \u2013 Acciones y Participaciones Societarias: DDJJ CUIT "+p.terminacion,org:"ARCA"};}},
+  {id:"part_soc_rentas",cat:"ARCA \u2014 Ganancias / Bienes Personales",label:"Participaciones Societarias y Rentas Pasivas 2025 (julio)",desc:"DDJJ Participaciones Societarias y Rentas Pasivas per\u00edodo 2025. Vence julio 2026. CUIT 0-3: d\u00eda 27, CUIT 4-6: d\u00eda 28, CUIT 7-9: d\u00eda 29.",org:"ARCA",
+    calcFecha:function(pKey,p){
+      if(pKey!=="2026-07")return null;
+      var dias=[27,27,27,27,28,28,28,29,29,29];
+      return {fecha:mkF(pKey,dias[+p.terminacion]),detalle:"Participaciones Societarias y Rentas Pasivas 2025: DDJJ CUIT "+p.terminacion,org:"ARCA"};
+    }},
   {id:"bp_ph",cat:"ARCA \u2014 Bienes Personales",label:"Bs. Pers. PH \u2014 DDJJ Anual (junio)",desc:"DDJJ anual Bienes Personales PH. Vence junio.",org:"ARCA",
     calcFecha:function(pKey,p){if(pKey.slice(5)!=="06")return null;var dias=[12,12,13,13,16,16,17,17,17,17];return {fecha:mkF(pKey,dias[p.grupo]),detalle:"Bs. Pers. PH: Pago CUIT "+p.terminacion,org:"ARCA"};}},
   {id:"oblig_vol",cat:"ARCA \u2014 Otros",label:"Obligaci\u00f3n Voluntaria \u2014 F.575/RT",desc:"Ingreso voluntario de fondos Ganancias (F.575/RT). D\u00eda 16.",org:"ARCA",
