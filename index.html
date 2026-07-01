@@ -610,15 +610,35 @@ function esFinDeSemana(fecha){
 }
 
 function siguienteHabil(fecha){
-  // Mueve la fecha al próximo día hábil si cae en feriado o fin de semana
   var d=new Date(fecha+"T12:00:00");
-  var max=20; // seguridad: máx 20 iteraciones
-  while((esFinDeSemana(fecha)||esFeriado(fecha)) && max-->0){
+  var dow=d.getDay(); // 0=dom, 1=lun...5=vie, 6=sab
+
+  // Sábado → viernes anterior
+  if(dow===6){
+    d.setDate(d.getDate()-1);
+    var yyyy=d.getFullYear();
+    var mm=("0"+(d.getMonth()+1)).slice(-2);
+    var dd=("0"+d.getDate()).slice(-2);
+    fecha=yyyy+"-"+mm+"-"+dd;
+    // Si el viernes también es feriado, seguir para atrás
+    var max=5;
+    while(esFeriado(fecha)&&max-->0){
+      d.setDate(d.getDate()-1);
+      yyyy=d.getFullYear();mm=("0"+(d.getMonth()+1)).slice(-2);dd=("0"+d.getDate()).slice(-2);
+      fecha=yyyy+"-"+mm+"-"+dd;
+    }
+    return fecha;
+  }
+
+  // Domingo o feriado → siguiente día hábil (saltando también sábados y feriados encadenados)
+  var max=10;
+  while((dow===0||dow===6||esFeriado(fecha))&&max-->0){
     d.setDate(d.getDate()+1);
     var yyyy=d.getFullYear();
     var mm=("0"+(d.getMonth()+1)).slice(-2);
     var dd=("0"+d.getDate()).slice(-2);
     fecha=yyyy+"-"+mm+"-"+dd;
+    dow=d.getDay();
   }
   return fecha;
 }
